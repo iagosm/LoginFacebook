@@ -1,6 +1,7 @@
 <?php
 session_start();
-
+// unset($_SESSION['face_access_token']);
+include_once 'conexao.php';
 // require_once __DIR__ . '/vendor/autoload.php'; // change path as needed
 require_once 'lib/Facebook/autoload.php';
 $fb = new \Facebook\Facebook([
@@ -53,7 +54,18 @@ if(!isset($accessToken)) {
     //Returna ao facebook\facebookresponse objeto
     $response = $fb->get('/me?fields=name, picture, id, email'); // Já está sendo definido acima o acess token de forma default
     $user = $response->getGraphUser();
-    var_dump($user); 
+    // var_dump($user);
+    $result_usuario = "SELECT id, nome, email FROM usuarios WHERE usuario='".$user['id'] ."' LIMIT 1";
+		$resultado_usuario = mysqli_query($conn, $result_usuario);
+		if($resultado_usuario){
+			$row_usuario = mysqli_fetch_assoc($resultado_usuario);
+			  $_SESSION['id'] = $row_usuario['id'];
+				$_SESSION['nome'] = $row_usuario['nome'];
+				$_SESSION['email'] = $row_usuario['email'];
+				header("Location: administrativo.php");
+			}
+		
+
   } catch(Facebook\Exceptions\FacebookResponseException $e) {
 		echo 'Graph returned an error: ' . $e->getMessage();
 		exit;
@@ -64,4 +76,3 @@ if(!isset($accessToken)) {
 }
 ?>
 
-<a href="<?php echo $loginUrl ; ?>">Facebook</a>
